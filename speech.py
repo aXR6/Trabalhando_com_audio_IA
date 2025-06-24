@@ -1,6 +1,7 @@
 import os
 import shutil
 from transformers import pipeline
+import inspect
 
 
 def transcribe_audio(audio_path: str, language_code: str) -> str:
@@ -15,9 +16,19 @@ def transcribe_audio(audio_path: str, language_code: str) -> str:
         model="openai/whisper-large-v3-turbo",
         token=os.getenv("HUGGINGFACE_TOKEN"),
     )
-    result = asr(
-        audio_path,
-        language=language_code,
-        return_timestamps=True,
-    )
+
+    call_params = inspect.signature(asr.__call__).parameters
+    if "language" in call_params:
+        result = asr(
+            audio_path,
+            language=language_code,
+            return_timestamps=True,
+        )
+    else:
+        result = asr(
+            audio_path,
+            return_timestamps=True,
+            generate_kwargs={"language": language_code},
+        )
+
     return result["text"].strip()
