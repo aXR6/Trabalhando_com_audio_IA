@@ -3,3 +3,4 @@ torch
 python-dotenv
 psycopg2-binary
 rich
+googletrans==4.0.0-rc1
