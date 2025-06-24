@@ -1,4 +1,3 @@
-import os
 from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 from dotenv import load_dotenv
