@@ -27,7 +27,19 @@ source "$ENV_DIR/bin/activate"
 echo "⬆️  Atualizando pip para versão estável..."
 python3 -m pip install --upgrade "pip<25" setuptools wheel
 
-# 4) Instalar todas as libs do requirements.txt
+# 4) Garantir ffmpeg instalado
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "📼  Instalando ffmpeg..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update && sudo apt-get install -y ffmpeg
+  else
+    echo "⚠️  ffmpeg não encontrado e instalação automática indisponível. Instale manualmente."
+  fi
+else
+  echo "✔️  ffmpeg já está instalado"
+fi
+
+# 5) Instalar todas as libs do requirements.txt
 if [ -f "$REQ_FILE" ]; then
   echo "📦  Instalando dependências de $REQ_FILE..."
   pip install -r "$REQ_FILE"
