@@ -1,6 +1,6 @@
 # Trabalhando com Audio IA
 
-Este projeto demonstra o uso do modelo `openai/whisper-large-v3-turbo` da HuggingFace para transcrever arquivos de áudio. A tradução do texto pode ser realizada tanto com o `facebook/nllb-200-distilled-600M` quanto com o próprio `openai/whisper-large-v3-turbo`, escolhidos por meio de um menu interativo. Os resultados podem ser opcionalmente armazenados em um banco de dados PostgreSQL.
+Este projeto demonstra o uso do modelo `openai/whisper-large-v3-turbo` da HuggingFace para transcrever arquivos de áudio. A tradução do texto pode ser realizada tanto com o modelo `facebook/nllb-200-distilled-600M` quanto com a API `gpt-3.5-turbo` da OpenAI, escolhidos por meio de um menu interativo. Os resultados podem ser opcionalmente armazenados em um banco de dados PostgreSQL.
 
 ## Requisitos
 - Python 3.10+
