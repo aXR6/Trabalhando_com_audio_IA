@@ -1,7 +1,7 @@
 import os
 import shutil
 from transformers import pipeline
-from translator import LANG_CODE
+from languages import LANG_CODE
 
 
 def transcribe_audio(audio_path: str, language_name: str) -> str:
