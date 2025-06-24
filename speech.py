@@ -13,5 +13,9 @@ def transcribe_audio(audio_path: str, language_name: str) -> str:
         model="openai/whisper-large-v3-turbo",
         token=os.getenv("HUGGINGFACE_TOKEN"),
     )
-    result = asr(audio_path, generate_kwargs={"language": lang_code})
+    result = asr(
+        audio_path,
+        generate_kwargs={"language": lang_code},
+        return_timestamps=True,
+    )
     return result["text"].strip()
