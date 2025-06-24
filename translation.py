@@ -13,7 +13,7 @@ NLLB_CODES = {
 # runtime using :func:`set_translation_model`.
 MODEL_OPTIONS = {
     "1": "facebook/nllb-200-distilled-600M",
-    "2": "openai/whisper-large-v3-turbo",
+    "2": "facebook/m2m100_418M",
 }
 
 MODEL_NAME = MODEL_OPTIONS["1"]
