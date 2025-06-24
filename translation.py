@@ -9,7 +9,29 @@ NLLB_CODES = {
     "french": "fra_Latn",
 }
 
-MODEL_NAME = "facebook/nllb-200-distilled-600M"
+# Available translation models. The ``MODEL_NAME`` value can be switched at
+# runtime using :func:`set_translation_model`.
+MODEL_OPTIONS = {
+    "1": "facebook/nllb-200-distilled-600M",
+    "2": "openai/whisper-large-v3-turbo",
+}
+
+MODEL_NAME = MODEL_OPTIONS["1"]
+
+
+def set_translation_model(option: str) -> None:
+    """Set the translation model to one of ``MODEL_OPTIONS``.
+
+    Parameters
+    ----------
+    option:
+        The key corresponding to the desired model in ``MODEL_OPTIONS``.
+    """
+    global MODEL_NAME
+    if option not in MODEL_OPTIONS:
+        raise ValueError("Opção de modelo inválida")
+    MODEL_NAME = MODEL_OPTIONS[option]
+    _load_model.cache_clear()
 
 
 @lru_cache(maxsize=1)
@@ -26,7 +48,7 @@ def _chunk_text(text: str, size: int = 512) -> list[str]:
 
 
 def translate_text(text: str, src_code: str, tgt_code: str) -> str:
-    """Translate ``text`` from ``src_code`` to ``tgt_code`` using NLLB."""
+    """Translate ``text`` from ``src_code`` to ``tgt_code`` using the selected model."""
     if src_code == tgt_code:
         return text
 
