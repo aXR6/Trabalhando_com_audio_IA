@@ -33,6 +33,11 @@ def translate_text(text: str, src_lang: str, tgt_lang: str) -> str:
     # Using translate.googleapis.com directly avoids some parsing issues that
     # occur when hitting the default endpoint via googletrans.
     translator = Translator(service_urls=["translate.googleapis.com"])
+    # googletrans 4.0.0-rc1 expects an attribute named ``raise_Exception`` in
+    # ``Translator._translate`` but only ``raise_exception`` is defined. Add the
+    # missing attribute for compatibility with this library version.
+    if not hasattr(translator, "raise_Exception"):
+        translator.raise_Exception = getattr(translator, "raise_exception", True)
 
     src_code = LANG_CODE[src_lang]
     tgt_code = LANG_CODE[tgt_lang]
