@@ -17,7 +17,7 @@ def transcribe_audio(audio_path: str, language_code: str) -> str:
     )
     result = asr(
         audio_path,
-        generate_kwargs={"language": language_code},
+        language=language_code,
         return_timestamps=True,
     )
     return result["text"].strip()
