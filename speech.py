@@ -1,13 +1,15 @@
 import os
 import shutil
 from transformers import pipeline
-from languages import LANG_CODE
 
 
-def transcribe_audio(audio_path: str, language_name: str) -> str:
+def transcribe_audio(audio_path: str, language_code: str) -> str:
+    """Transcribe ``audio_path`` using Whisper with the given language code."""
     if not shutil.which("ffmpeg"):
-        raise RuntimeError("ffmpeg não encontrado. Instale o pacote ffmpeg para processar arquivos de áudio.")
-    lang_code = LANG_CODE.get(language_name, 'en')
+        raise RuntimeError(
+            "ffmpeg não encontrado. Instale o pacote ffmpeg para processar arquivos de áudio."
+        )
+
     asr = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-large-v3-turbo",
@@ -15,7 +17,7 @@ def transcribe_audio(audio_path: str, language_name: str) -> str:
     )
     result = asr(
         audio_path,
-        generate_kwargs={"language": lang_code},
+        generate_kwargs={"language": language_code},
         return_timestamps=True,
     )
     return result["text"].strip()
