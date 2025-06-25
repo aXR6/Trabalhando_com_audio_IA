@@ -27,17 +27,17 @@ def transcribe_menu():
     tgt_lang = choose_language("Traduzir para:")
 
 
-    console.print("[bold]Transcrevendo...[/bold]")
-    original_text = transcribe_audio(audio_path, LANG_CODE[src_lang])
+    with console.status("[bold green]Transcrevendo...[/bold green]"):
+        original_text = transcribe_audio(audio_path, LANG_CODE[src_lang])
     console.print("\n[bold]Texto extraído:[/bold]")
     console.print(original_text)
 
-    console.print("\n[bold]Traduzindo...[/bold]")
-    translated_text = translate_text(
-        original_text,
-        LANG_CODE[src_lang],
-        LANG_CODE[tgt_lang],
-    )
+    with console.status("[bold green]Traduzindo...[/bold green]"):
+        translated_text = translate_text(
+            original_text,
+            LANG_CODE[src_lang],
+            LANG_CODE[tgt_lang],
+        )
     console.print("\n[bold]Texto traduzido:[/bold]")
     console.print(translated_text)
 
