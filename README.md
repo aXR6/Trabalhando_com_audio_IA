@@ -32,3 +32,8 @@ python web.py
 
 Depois, abra `http://localhost:5000` para enviar o áudio pela interface
 gráfica.
+
+Ao abrir uma sessão existente, serão listados todos os áudios já processados,
+incluindo o texto extraído e o texto traduzido. A página também informa os
+modelos utilizados: `openai/whisper-large-v3-turbo` para transcrição e
+`facebook/nllb-200-distilled-600M` para tradução.
