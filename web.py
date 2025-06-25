@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 from speech import transcribe_audio
@@ -36,6 +36,36 @@ def transcrever():
         save_record(user_name, subject, file_path, original_text, translated_text)
 
     return render_template('index.html', langs=LANG_OPTIONS, original_text=original_text, translated_text=translated_text)
+
+@app.route('/api/transcribe', methods=['POST'])
+def api_transcribe():
+    file = request.files['audio']
+    src_lang = request.form['src_lang']
+
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
+
+    original_text = transcribe_audio(file_path, LANG_CODE[src_lang])
+    return jsonify({'original_text': original_text, 'file_path': file_path})
+
+
+@app.route('/api/translate', methods=['POST'])
+def api_translate():
+    text = request.form['text']
+    src_lang = request.form['src_lang']
+    tgt_lang = request.form['tgt_lang']
+    file_path = request.form.get('file_path')
+    user_name = request.form.get('user_name')
+    subject = request.form.get('subject')
+    save_db = request.form.get('save') == '1'
+
+    translated_text = translate_text(text, LANG_CODE[src_lang], LANG_CODE[tgt_lang])
+
+    if save_db and user_name and subject and file_path:
+        save_record(user_name, subject, file_path, text, translated_text)
+
+    return jsonify({'translated_text': translated_text})
 
 if __name__ == '__main__':
     init_db()
