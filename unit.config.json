@@ -7,7 +7,6 @@
     "applications": {
         "flaskapp": {
             "type": "python",
-            "home": "/app",
             "path": "/app",
             "module": "web",
             "callable": "app",
