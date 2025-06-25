@@ -1,4 +1,4 @@
-FROM nginx/unit:1.34.2-python3.11
+FROM nginx/unit:1.29.1-python3.11
 
 WORKDIR /app
 
