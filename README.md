@@ -1,52 +1,70 @@
-# Trabalhando com Audio IA
+# Trabalhando com Áudio e IA
 
-Este projeto demonstra o uso do modelo `openai/whisper-large-v3-turbo` da HuggingFace para transcrever arquivos de áudio. A tradução do texto é feita com o modelo `facebook/nllb-200-distilled-600M`. Os resultados podem ser opcionalmente armazenados em um banco de dados PostgreSQL.
+Este projeto demonstra como transcrever e traduzir arquivos de áudio utilizando modelos de inteligência artificial. São empregadas duas redes pré‑treinadas hospedadas no HuggingFace:
+
+- **openai/whisper-large-v3-turbo** – responsável pela transcrição do áudio para texto.
+- **facebook/nllb-200-distilled-600M** – usada para traduzir o texto para outros idiomas.
+
+Os resultados podem opcionalmente ser salvos em um banco PostgreSQL, permitindo organizar sessões de transcrição e consultar registros anteriores por meio de uma interface web.
+
+## Funcionalidades
+
+- **Transcrição de áudio** em diferentes idiomas através do Whisper.
+- **Tradução automática** do texto extraído para o idioma desejado.
+- **Armazenamento opcional** dos resultados no banco de dados com registro de usuário, sessão e assunto.
+- **Interface de linha de comando** simples para processar arquivos locais.
+- **Aplicação web** em Flask com upload de múltiplos áudios, painel de sessões e visualização dos resultados.
 
 ## Requisitos
+
 - Python 3.10+
-- PostgresSQL
-- [FFmpeg](https://ffmpeg.org/)
+- PostgreSQL configurado
+- [FFmpeg](https://ffmpeg.org/) – necessário para que o Whisper consiga ler o áudio.
 
 ## Configuração
+
 1. Copie o arquivo `.env.example` para `.env` e ajuste as variáveis de ambiente.
 2. Instale as dependências:
    ```bash
    pip install -r requirements.txt
    ```
-   # FFmpeg é necessário para que o modelo leia arquivos de áudio.
-   # Em sistemas Debian/Ubuntu, instale com:
-   # sudo apt-get install ffmpeg
+   Em sistemas Debian/Ubuntu, FFmpeg pode ser instalado com:
+   ```bash
+   sudo apt-get install ffmpeg
+   ```
+3. Crie as tabelas executando o script `schema.sql` no banco de dados.
 
-3. Crie a tabela no banco de dados executando o script `schema.sql`.
+## Usando pelo Terminal
 
-## Estrutura do Banco de Dados
-O banco utiliza três tabelas principais:
+Execute o script principal e siga as instruções exibidas:
 
-- `users` guarda os usuários cadastrados.
-- `sessions` registra as sessões associadas a um usuário. O par
-  `(user_id, session_name)` é único, permitindo que um mesmo usuário tenha
-  várias sessões.
-- `audio_records` armazena os áudios processados e referencia a sessão em que
-  foram criados.
+```bash
+python main.py
+```
 
-Assim, um usuário pode ter nenhuma ou várias sessões, enquanto cada sessão é
-sempre vinculada a apenas um usuário.
+Você poderá escolher o idioma de origem, o idioma de destino e o arquivo de áudio a ser processado. Após a transcrição e tradução, o programa oferece a opção de salvar o resultado no banco de dados.
 
-## Uso
-Para utilizar no terminal, execute `python main.py` e navegue pelo menu para
-transcrever arquivos de áudio.
+## Usando a Interface Web
 
-Também é possível acessar as mesmas funcionalidades via navegador iniciando o
-servidor web:
+Para utilizar pelo navegador, inicie o servidor Flask:
 
 ```bash
 python web.py
 ```
 
-Depois, abra `http://localhost:5000` para enviar o áudio pela interface
-gráfica.
+Acesse `http://localhost:5000` e informe o nome do usuário para visualizar ou criar sessões. Dentro de cada sessão é possível fazer upload de um ou mais arquivos de áudio, definir os idiomas e opcionalmente salvar cada transcrição no banco de dados. O painel também lista todos os áudios já processados com seus textos originais e traduzidos.
 
-Ao abrir uma sessão existente, serão listados todos os áudios já processados,
-incluindo o texto extraído e o texto traduzido. A página também informa os
-modelos utilizados: `openai/whisper-large-v3-turbo` para transcrição e
-`facebook/nllb-200-distilled-600M` para tradução.
+## Estrutura do Banco de Dados
+
+O banco utiliza três tabelas principais:
+
+- `users` – guarda os usuários cadastrados.
+- `sessions` – registra as sessões associadas a cada usuário.
+- `audio_records` – armazena os áudios processados, vinculados à sessão correspondente.
+
+Dessa forma, um usuário pode ter diversas sessões, e cada sessão agrupa seus respectivos registros de áudio.
+
+---
+
+Este repositório fornece um ponto de partida simples para trabalhar com processamento de áudio assistido por IA. Sinta‑se à vontade para personalizar o código e expandir as funcionalidades conforme necessário.
+
