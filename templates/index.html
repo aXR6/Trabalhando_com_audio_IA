@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Transcrever Áudio</title>
+</head>
+<body>
+    <h1>Transcrever e Traduzir Áudio</h1>
+    <form action="/transcrever" method="post" enctype="multipart/form-data">
+        <label for="audio">Arquivo de áudio:</label>
+        <input type="file" name="audio" id="audio" required><br><br>
+
+        <label for="src_lang">Idioma de origem:</label>
+        <select name="src_lang" id="src_lang">
+            {% for lang in langs %}
+            <option value="{{ lang }}">{{ lang }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="tgt_lang">Traduzir para:</label>
+        <select name="tgt_lang" id="tgt_lang">
+            {% for lang in langs %}
+            <option value="{{ lang }}">{{ lang }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="user_name">Nome do usuário:</label>
+        <input type="text" name="user_name" id="user_name"><br><br>
+
+        <label for="subject">Assunto:</label>
+        <input type="text" name="subject" id="subject"><br><br>
+
+        <label for="save">Salvar no banco de dados:</label>
+        <input type="checkbox" name="save" id="save" value="1"><br><br>
+
+        <button type="submit">Processar</button>
+    </form>
+    {% if original_text %}
+    <h2>Texto Extraído</h2>
+    <p>{{ original_text }}</p>
+    <h2>Texto Traduzido</h2>
+    <p>{{ translated_text }}</p>
+    {% endif %}
+</body>
+</html>

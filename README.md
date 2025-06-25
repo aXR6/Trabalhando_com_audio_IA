@@ -20,4 +20,15 @@ Este projeto demonstra o uso do modelo `openai/whisper-large-v3-turbo` da Huggin
 3. Crie a tabela no banco de dados executando o script `schema.sql`.
 
 ## Uso
-Execute `python main.py` e navegue pelo menu para transcrever arquivos de áudio.
+Para utilizar no terminal, execute `python main.py` e navegue pelo menu para
+transcrever arquivos de áudio.
+
+Também é possível acessar as mesmas funcionalidades via navegador iniciando o
+servidor web:
+
+```bash
+python web.py
+```
+
+Depois, abra `http://localhost:5000` para enviar o áudio pela interface
+gráfica.
