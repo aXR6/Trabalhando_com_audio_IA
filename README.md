@@ -19,6 +19,19 @@ Este projeto demonstra o uso do modelo `openai/whisper-large-v3-turbo` da Huggin
 
 3. Crie a tabela no banco de dados executando o script `schema.sql`.
 
+## Estrutura do Banco de Dados
+O banco utiliza três tabelas principais:
+
+- `users` guarda os usuários cadastrados.
+- `sessions` registra as sessões associadas a um usuário. O par
+  `(user_id, session_name)` é único, permitindo que um mesmo usuário tenha
+  várias sessões.
+- `audio_records` armazena os áudios processados e referencia a sessão em que
+  foram criados.
+
+Assim, um usuário pode ter nenhuma ou várias sessões, enquanto cada sessão é
+sempre vinculada a apenas um usuário.
+
 ## Uso
 Para utilizar no terminal, execute `python main.py` e navegue pelo menu para
 transcrever arquivos de áudio.

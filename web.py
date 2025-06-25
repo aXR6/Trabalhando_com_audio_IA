@@ -4,7 +4,14 @@ import os
 from speech import transcribe_audio
 from translation import translate_text
 from languages import LANG_CODE
-from db import init_db, save_record, list_sessions, list_records
+from db import (
+    init_db,
+    save_record,
+    list_sessions,
+    list_records,
+    ensure_session,
+    ensure_user,
+)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -19,9 +26,11 @@ def sessions_view():
     sessions = None
     if request.method == 'POST':
         user_name = request.form['user_name']
+        ensure_user(user_name)
         sessions = list_sessions(user_name)
     elif request.args.get('user_name'):
         user_name = request.args['user_name']
+        ensure_user(user_name)
         sessions = list_sessions(user_name)
     return render_template('sessions.html', user_name=user_name, sessions=sessions)
 
@@ -32,6 +41,7 @@ def index():
     session_name = request.args.get('session_name')
     if not user_name or not session_name:
         return redirect(url_for('sessions_view'))
+    ensure_session(user_name, session_name)
     records = list_records(user_name, session_name)
     return render_template(
         'index.html',

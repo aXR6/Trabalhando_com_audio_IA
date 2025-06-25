@@ -56,6 +56,17 @@ def get_or_create_session(user_id: int, session_name: str) -> int:
         return session_id
 
 
+def ensure_user(user_name: str) -> int:
+    """Return ``user_id`` creating the user if needed."""
+    return get_or_create_user(user_name)
+
+
+def ensure_session(user_name: str, session_name: str) -> int:
+    """Ensure session exists for ``user_name`` and return its id."""
+    user_id = ensure_user(user_name)
+    return get_or_create_session(user_id, session_name)
+
+
 def save_record(user_name: str, session_name: str, subject: str, audio_path: str, original_text: str, translated_text: str):
     user_id = get_or_create_user(user_name)
     session_id = get_or_create_session(user_id, session_name)
