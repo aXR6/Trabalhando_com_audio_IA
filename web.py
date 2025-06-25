@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 from speech import transcribe_audio
 from translation import translate_text
 from languages import LANG_CODE
-from db import init_db, save_record
+from db import init_db, save_record, list_sessions
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -12,9 +12,28 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 LANG_OPTIONS = list(LANG_CODE.keys())
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
+def sessions_view():
+    """Prompt for user name and show existing sessions."""
+    user_name = None
+    sessions = None
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        sessions = list_sessions(user_name)
+    elif request.args.get('user_name'):
+        user_name = request.args['user_name']
+        sessions = list_sessions(user_name)
+    return render_template('sessions.html', user_name=user_name, sessions=sessions)
+
+
+@app.route('/panel', methods=['GET'])
 def index():
-    return render_template('index.html', langs=LANG_OPTIONS, results=None)
+    user_name = request.args.get('user_name')
+    session_name = request.args.get('session_name')
+    if not user_name or not session_name:
+        return redirect(url_for('sessions_view'))
+    return render_template('index.html', langs=LANG_OPTIONS, results=None,
+                           user_name=user_name, session_name=session_name)
 
 @app.route('/transcrever', methods=['POST'])
 def transcrever():
@@ -40,7 +59,8 @@ def transcrever():
 
         results.append({'filename': filename, 'original_text': original_text, 'translated_text': translated_text})
 
-    return render_template('index.html', langs=LANG_OPTIONS, results=results)
+    return render_template('index.html', langs=LANG_OPTIONS, results=results,
+                           user_name=user_name, session_name=session_name)
 
 @app.route('/api/transcribe', methods=['POST'])
 def api_transcribe():

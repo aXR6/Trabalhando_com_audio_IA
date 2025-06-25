@@ -68,3 +68,24 @@ def save_record(user_name: str, session_name: str, subject: str, audio_path: str
             (session_id, subject, audio_path, original_text, translated_text)
         )
         conn.commit()
+
+
+def list_sessions(user_name: str) -> list[dict]:
+    """Return all sessions for ``user_name`` with record counts."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT s.session_name, COUNT(ar.id) AS record_count
+            FROM sessions s
+            JOIN users u ON s.user_id = u.id
+            LEFT JOIN audio_records ar ON ar.session_id = s.id
+            WHERE u.name = %s
+            GROUP BY s.id
+            ORDER BY s.created_at DESC
+            """,
+            (user_name,),
+        )
+        rows = cur.fetchall()
+        return [
+            {"session_name": r[0], "record_count": r[1]} for r in rows
+        ]
