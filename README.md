@@ -55,6 +55,22 @@ python web.py
 
 Acesse `http://localhost:5000` para fazer login ou criar uma conta. Após entrar, escolha ou crie uma sessão. Dentro de cada sessão é possível fazer upload de um ou mais arquivos de áudio, definir os idiomas e opcionalmente salvar cada transcrição no banco de dados. O painel também lista todos os áudios já processados com seus textos originais e traduzidos.
 
+## Executando com Docker e Nginx Unit
+
+O projeto inclui um `Dockerfile` configurado para o [Nginx Unit](https://unit.nginx.org/). Para gerar a imagem execute:
+
+```bash
+docker build -t audio-app .
+```
+
+Depois crie o contêiner informando suas variáveis de ambiente (por exemplo o arquivo `.env`) e exponha a porta 8080:
+
+```bash
+docker run -d --env-file .env -p 8080:8000 audio-app
+```
+
+A interface web ficará acessível em `http://localhost:8080`.
+
 ## Estrutura do Banco de Dados
 
 O banco utiliza três tabelas principais:
