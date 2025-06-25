@@ -14,6 +14,7 @@ Os resultados podem opcionalmente ser salvos em um banco PostgreSQL, permitindo 
 - **Armazenamento opcional** dos resultados no banco de dados com registro de usuário, sessão e assunto.
 - **Interface de linha de comando** simples para processar arquivos locais.
 - **Aplicação web** em Flask com upload de múltiplos áudios, painel de sessões e visualização dos resultados.
+- **Autenticação de usuários** com senha e PIN para recuperação de acesso.
 
 ## Requisitos
 
@@ -52,13 +53,13 @@ Para utilizar pelo navegador, inicie o servidor Flask:
 python web.py
 ```
 
-Acesse `http://localhost:5000` e informe o nome do usuário para visualizar ou criar sessões. Dentro de cada sessão é possível fazer upload de um ou mais arquivos de áudio, definir os idiomas e opcionalmente salvar cada transcrição no banco de dados. O painel também lista todos os áudios já processados com seus textos originais e traduzidos.
+Acesse `http://localhost:5000` para fazer login ou criar uma conta. Após entrar, escolha ou crie uma sessão. Dentro de cada sessão é possível fazer upload de um ou mais arquivos de áudio, definir os idiomas e opcionalmente salvar cada transcrição no banco de dados. O painel também lista todos os áudios já processados com seus textos originais e traduzidos.
 
 ## Estrutura do Banco de Dados
 
 O banco utiliza três tabelas principais:
 
-- `users` – guarda os usuários cadastrados.
+- `users` – guarda os usuários cadastrados junto com o hash da senha e o PIN de recuperação.
 - `sessions` – registra as sessões associadas a cada usuário.
 - `audio_records` – armazena os áudios processados, vinculados à sessão correspondente.
 

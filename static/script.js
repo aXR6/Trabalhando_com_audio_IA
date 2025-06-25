@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 td.append('text', data.original_text);
                 td.append('src_lang', commonData.get('src_lang'));
                 td.append('tgt_lang', commonData.get('tgt_lang'));
-                td.append('user_name', commonData.get('user_name'));
                 td.append('session_name', commonData.get('session_name'));
                 td.append('subject', commonData.get('subject'));
                 td.append('save', commonData.get('save'));
