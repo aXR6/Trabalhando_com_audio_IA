@@ -2,50 +2,58 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('audio-form');
     const progress = document.getElementById('progress');
-    const originalText = document.getElementById('original_text');
-    const translatedText = document.getElementById('translated_text');
+    const resultsBox = document.getElementById('results');
 
     if (!form) return;
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        progress.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div><strong>Extraindo texto...</strong></div>';
-        originalText.textContent = '';
-        translatedText.textContent = '';
+        progress.innerHTML = '';
+        resultsBox.innerHTML = '';
 
-        const formData = new FormData(form);
+        const files = document.getElementById('audio').files;
+        const commonData = new FormData(form);
 
         try {
-            const resp = await fetch('/api/transcribe', {
-                method: 'POST',
-                body: formData
-            });
-            if (!resp.ok) throw new Error();
+        for (const file of files) {
+            progress.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div><strong>Processando ' + file.name + '...</strong></div>';
+
+            const fd = new FormData();
+            fd.append('audio', file);
+            fd.append('src_lang', commonData.get('src_lang'));
+
+            const resp = await fetch('/api/transcribe', { method: 'POST', body: fd });
+            if (!resp.ok) { progress.innerHTML = 'Erro na transcrição'; break; }
             const data = await resp.json();
-            originalText.textContent = data.original_text;
 
             progress.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div><strong>Traduzindo...</strong></div>';
 
-            const translateData = new FormData();
-            translateData.append('text', data.original_text);
-            translateData.append('src_lang', formData.get('src_lang'));
-            translateData.append('tgt_lang', formData.get('tgt_lang'));
-            translateData.append('user_name', formData.get('user_name'));
-            translateData.append('subject', formData.get('subject'));
-            translateData.append('save', formData.get('save'));
-            translateData.append('file_path', data.file_path);
+            const td = new FormData();
+            td.append('text', data.original_text);
+            td.append('src_lang', commonData.get('src_lang'));
+            td.append('tgt_lang', commonData.get('tgt_lang'));
+            td.append('user_name', commonData.get('user_name'));
+            td.append('session_name', commonData.get('session_name'));
+            td.append('subject', commonData.get('subject'));
+            td.append('save', commonData.get('save'));
+            td.append('file_path', data.file_path);
 
-            const resp2 = await fetch('/api/translate', {
-                method: 'POST',
-                body: translateData
-            });
-            if (!resp2.ok) throw new Error();
+            const resp2 = await fetch('/api/translate', { method: 'POST', body: td });
+            if (!resp2.ok) { progress.innerHTML = 'Erro na tradução'; break; }
             const data2 = await resp2.json();
-            translatedText.textContent = data2.translated_text;
-            progress.innerHTML = '';
-        } catch (err) {
-            progress.innerHTML = '<span class="text-danger">Ocorreu um erro no processamento.</span>';
+
+            const item = document.createElement('div');
+            item.className = 'mb-4';
+            item.innerHTML = '<h4>' + file.name + '</h4>' +
+                '<strong>Texto Extraído:</strong><p>' + data.original_text + '</p>' +
+                '<strong>Texto Traduzido:</strong><p>' + data2.translated_text + '</p>';
+            resultsBox.appendChild(item);
         }
+        progress.innerHTML = '';
+        }
+    } catch (err) {
+        progress.innerHTML = '<span class="text-danger">Ocorreu um erro no processamento.</span>';
+    }
     });
 });
 

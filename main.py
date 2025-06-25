@@ -43,8 +43,9 @@ def transcribe_menu():
 
     if Prompt.ask("Deseja salvar no banco de dados? (s/n)", choices=["s", "n"], default="n") == "s":
         user_name = Prompt.ask("Nome do usuário")
+        session_name = Prompt.ask("Nome da sessão")
         subject = Prompt.ask("Assunto")
-        save_record(user_name, subject, audio_path, original_text, translated_text)
+        save_record(user_name, session_name, subject, audio_path, original_text, translated_text)
         console.print("Registro salvo com sucesso.")
 
 
