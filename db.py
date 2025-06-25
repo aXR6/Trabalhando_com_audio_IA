@@ -1,6 +1,7 @@
 import os
 import psycopg2
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
@@ -24,17 +25,52 @@ def init_db():
         conn.commit()
 
 
-def get_or_create_user(user_name: str) -> int:
-    """Return the id for ``user_name``, creating the user if needed."""
+def get_user_id(user_name: str) -> int | None:
+    """Return the id for ``user_name`` or ``None`` if not found."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("SELECT id FROM users WHERE name=%s", (user_name,))
         row = cur.fetchone()
-        if row:
-            return row[0]
-        cur.execute("INSERT INTO users (name) VALUES (%s) RETURNING id", (user_name,))
+        return row[0] if row else None
+
+
+def create_user(user_name: str, password: str, pin: str) -> int:
+    """Create a new user with ``password`` and ``pin`` and return its id."""
+    password_hash = generate_password_hash(password)
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO users (name, password_hash, pin) VALUES (%s, %s, %s) RETURNING id",
+            (user_name, password_hash, pin),
+        )
         user_id = cur.fetchone()[0]
         conn.commit()
         return user_id
+
+
+def verify_user(user_name: str, password: str) -> bool:
+    """Return ``True`` if ``password`` matches stored hash for ``user_name``."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT password_hash FROM users WHERE name=%s",
+            (user_name,),
+        )
+        row = cur.fetchone()
+        return check_password_hash(row[0], password) if row else False
+
+
+def reset_password(user_name: str, pin: str, new_password: str) -> bool:
+    """Update password if ``pin`` matches. Return ``True`` on success."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT pin FROM users WHERE name=%s", (user_name,))
+        row = cur.fetchone()
+        if not row or row[0] != pin:
+            return False
+        new_hash = generate_password_hash(new_password)
+        cur.execute(
+            "UPDATE users SET password_hash=%s WHERE name=%s",
+            (new_hash, user_name),
+        )
+        conn.commit()
+        return True
 
 
 def get_or_create_session(user_id: int, session_name: str) -> int:
@@ -57,8 +93,11 @@ def get_or_create_session(user_id: int, session_name: str) -> int:
 
 
 def ensure_user(user_name: str) -> int:
-    """Return ``user_id`` creating the user if needed."""
-    return get_or_create_user(user_name)
+    """Return ``user_id`` raising ``ValueError`` if user does not exist."""
+    user_id = get_user_id(user_name)
+    if user_id is None:
+        raise ValueError("Usuário não encontrado")
+    return user_id
 
 
 def ensure_session(user_name: str, session_name: str) -> int:
@@ -68,7 +107,7 @@ def ensure_session(user_name: str, session_name: str) -> int:
 
 
 def save_record(user_name: str, session_name: str, subject: str, audio_path: str, original_text: str, translated_text: str):
-    user_id = get_or_create_user(user_name)
+    user_id = ensure_user(user_name)
     session_id = get_or_create_session(user_id, session_name)
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(

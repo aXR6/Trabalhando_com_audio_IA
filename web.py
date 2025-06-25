@@ -1,4 +1,13 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    session,
+    flash,
+)
 from werkzeug.utils import secure_filename
 import os
 from speech import transcribe_audio
@@ -11,33 +20,79 @@ from db import (
     list_records,
     ensure_session,
     ensure_user,
+    create_user,
+    verify_user,
+    reset_password,
+    get_user_id,
 )
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "devkey")
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 LANG_OPTIONS = list(LANG_CODE.keys())
 
 @app.route('/', methods=['GET', 'POST'])
-def sessions_view():
-    """Prompt for user name and show existing sessions."""
-    user_name = None
-    sessions = None
+def login_view():
+    """Login using user name and password."""
     if request.method == 'POST':
         user_name = request.form['user_name']
-        ensure_user(user_name)
-        sessions = list_sessions(user_name)
-    elif request.args.get('user_name'):
-        user_name = request.args['user_name']
-        ensure_user(user_name)
-        sessions = list_sessions(user_name)
+        password = request.form['password']
+        if verify_user(user_name, password):
+            session['user_name'] = user_name
+            return redirect(url_for('sessions_view'))
+        flash('Credenciais inválidas')
+    return render_template('login.html')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_view():
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        password = request.form['password']
+        pin = request.form['pin']
+        if get_user_id(user_name):
+            flash('Usuário já existe')
+        else:
+            create_user(user_name, password, pin)
+            flash('Usuário criado com sucesso')
+            return redirect(url_for('login_view'))
+    return render_template('register.html')
+
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset_view():
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        pin = request.form['pin']
+        new_password = request.form['new_password']
+        if reset_password(user_name, pin, new_password):
+            flash('Senha atualizada')
+            return redirect(url_for('login_view'))
+        flash('PIN inválido')
+    return render_template('reset.html')
+
+
+@app.route('/logout')
+def logout_view():
+    session.clear()
+    return redirect(url_for('login_view'))
+
+
+@app.route('/sessions', methods=['GET'])
+def sessions_view():
+    """Show sessions for the logged in user."""
+    user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('login_view'))
+    sessions = list_sessions(user_name)
     return render_template('sessions.html', user_name=user_name, sessions=sessions)
 
 
 @app.route('/panel', methods=['GET'])
 def index():
-    user_name = request.args.get('user_name')
+    user_name = session.get('user_name')
     session_name = request.args.get('session_name')
     if not user_name or not session_name:
         return redirect(url_for('sessions_view'))
@@ -57,8 +112,10 @@ def transcrever():
     files = request.files.getlist('audio')
     src_lang = request.form['src_lang']
     tgt_lang = request.form['tgt_lang']
-    user_name = request.form.get('user_name')
+    user_name = session.get('user_name')
     session_name = request.form.get('session_name')
+    if not user_name or not session_name:
+        return redirect(url_for('sessions_view'))
     subject = request.form.get('subject')
     save_db = request.form.get('save') == '1'
 
@@ -105,7 +162,7 @@ def api_translate():
     src_lang = request.form['src_lang']
     tgt_lang = request.form['tgt_lang']
     file_path = request.form.get('file_path')
-    user_name = request.form.get('user_name')
+    user_name = session.get('user_name')
     session_name = request.form.get('session_name')
     subject = request.form.get('subject')
     save_db = request.form.get('save') == '1'
