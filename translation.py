@@ -9,29 +9,8 @@ NLLB_CODES = {
     "french": "fra_Latn",
 }
 
-# Available translation models. The ``MODEL_NAME`` value can be switched at
-# runtime using :func:`set_translation_model`.
-MODEL_OPTIONS = {
-    "1": "facebook/nllb-200-distilled-600M",
-    "2": "facebook/m2m100_418M",
-}
-
-MODEL_NAME = MODEL_OPTIONS["1"]
-
-
-def set_translation_model(option: str) -> None:
-    """Set the translation model to one of ``MODEL_OPTIONS``.
-
-    Parameters
-    ----------
-    option:
-        The key corresponding to the desired model in ``MODEL_OPTIONS``.
-    """
-    global MODEL_NAME
-    if option not in MODEL_OPTIONS:
-        raise ValueError("Opção de modelo inválida")
-    MODEL_NAME = MODEL_OPTIONS[option]
-    _load_model.cache_clear()
+# Translation model used by default.
+MODEL_NAME = "facebook/nllb-200-distilled-600M"
 
 
 @lru_cache(maxsize=1)

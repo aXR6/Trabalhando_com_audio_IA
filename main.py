@@ -3,7 +3,7 @@ from rich.prompt import Prompt, IntPrompt
 from dotenv import load_dotenv
 
 from speech import transcribe_audio
-from translation import translate_text, set_translation_model, MODEL_OPTIONS
+from translation import translate_text
 from languages import LANG_CODE
 from db import init_db, save_record
 
@@ -26,11 +26,6 @@ def transcribe_menu():
     src_lang = choose_language("Idioma de origem:")
     tgt_lang = choose_language("Traduzir para:")
 
-    console.print("\nEscolha o modelo de tradução:")
-    for key, name in MODEL_OPTIONS.items():
-        console.print(f"{key}. {name}")
-    model_choice = IntPrompt.ask("Opção", choices=list(MODEL_OPTIONS.keys()))
-    set_translation_model(str(model_choice))
 
     console.print("[bold]Transcrevendo...[/bold]")
     original_text = transcribe_audio(audio_path, LANG_CODE[src_lang])
