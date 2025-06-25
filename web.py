@@ -36,6 +36,8 @@ LANG_OPTIONS = list(LANG_CODE.keys())
 @app.route('/', methods=['GET', 'POST'])
 def login_view():
     """Login using user name and password."""
+    if session.get('user_name'):
+        return redirect(url_for('sessions_view'))
     if request.method == 'POST':
         user_name = request.form['user_name']
         password = request.form['password']
