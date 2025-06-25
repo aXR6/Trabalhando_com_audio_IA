@@ -18,10 +18,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const commonData = new FormData(form);
 
         try {
+            const step = 100 / files.length;
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 progressLabel.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div><strong>Processando ' + file.name + '...</strong></div>';
-                progressBar.style.width = ((i / files.length) * 100) + '%';
+                progressBar.style.width = (i * step) + '%';
 
                 const fd = new FormData();
                 fd.append('audio', file);
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const resp = await fetch('/api/transcribe', { method: 'POST', body: fd });
                 if (!resp.ok) { progressLabel.textContent = 'Erro na transcrição'; break; }
                 const data = await resp.json();
+                progressBar.style.width = (i * step + step / 2) + '%';
 
                 progressLabel.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div><strong>Traduzindo...</strong></div>';
 
@@ -53,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<strong>Texto Extraído:</strong><p>' + data.original_text + '</p>' +
                     '<strong>Texto Traduzido:</strong><p>' + data2.translated_text + '</p>';
                 resultsBox.appendChild(item);
-                progressBar.style.width = (((i + 1) / files.length) * 100) + '%';
+                progressBar.style.width = ((i + 1) * step) + '%';
             }
             progressLabel.innerHTML = '<span class="text-success">Concluído.</span>';
         } catch (err) {
