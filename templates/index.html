@@ -1,120 +1,109 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Transcrever Áudio</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="mb-4 text-center">Transcrever e Traduzir Áudio</h1>
-        <form id="audio-form" action="/transcrever" method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm">
-            <div class="mb-3">
-                <label for="audio" class="form-label">Arquivo de áudio:</label>
-                <input type="file" name="audio" id="audio" class="form-control" multiple required>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="src_lang" class="form-label">Idioma de origem:</label>
-                    <select name="src_lang" id="src_lang" class="form-select">
-                        {% for lang in langs %}
-                        <option value="{{ lang }}">{{ lang }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="tgt_lang" class="form-label">Traduzir para:</label>
-                    <select name="tgt_lang" id="tgt_lang" class="form-select">
-                        {% for lang in langs %}
-                        <option value="{{ lang }}">{{ lang }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="user_name" class="form-label">Nome do usuário:</label>
-                <input type="text" name="user_name" id="user_name" class="form-control" value="{{ user_name }}" readonly>
-            </div>
-
-            <div class="mb-3">
-                <label for="session_name" class="form-label">Nome da sessão:</label>
-                <input type="text" name="session_name" id="session_name" class="form-control" value="{{ session_name }}" readonly>
-            </div>
-
-            <div class="mb-3">
-                <label for="subject" class="form-label">Assunto:</label>
-                <input type="text" name="subject" id="subject" class="form-control">
-            </div>
-
-            <div class="form-check mb-4">
-                <input type="checkbox" name="save" id="save" value="1" class="form-check-input">
-                <label for="save" class="form-check-label">Salvar no banco de dados</label>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Processar</button>
-        </form>
-        <div id="progress" class="mt-4">
-            <div class="progress">
-                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
-            </div>
-            <div id="progress-label" class="mt-2"></div>
-        </div>
-        <div id="results" class="mt-5 result-box">
-            {% if results %}
-                {% for r in results %}
-                    <div class="mb-4">
-                        <h4>{{ r.filename }}</h4>
-                        <strong>Texto Extraído:</strong>
-                        <p>{{ r.original_text }}</p>
-                        <strong>Texto Traduzido:</strong>
-                        <p>{{ r.translated_text }}</p>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if records %}
-            <div class="mt-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="h4 mb-0">Áudios processados</h2>
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#records-collapse">Mostrar/Esconder</button>
-                </div>
-                <div class="collapse show" id="records-collapse">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Assunto</th>
-                                <th>Áudio</th>
-                                <th>Texto Extraído</th>
-                                <th>Texto Traduzido</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rec in records %}
-                            <tr>
-                                <td>{{ rec.subject }}</td>
-                                <td><a href="{{ rec.audio_path }}" target="_blank">Arquivo</a></td>
-                                <td>{{ rec.original_text }}</td>
-                                <td>{{ rec.translated_text }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {% endif %}
+{% extends 'layout.html' %}
+{% block title %}Transcrever Áudio{% endblock %}
+{% block content %}
+    <h1 class="mb-4 text-center">Transcrever e Traduzir Áudio</h1>
+    <form id="audio-form" action="/transcrever" method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm">
+        <div class="mb-3">
+            <label for="audio" class="form-label">Arquivo de áudio:</label>
+            <input type="file" name="audio" id="audio" class="form-control" multiple required>
         </div>
 
-        <div class="alert alert-info mt-4" role="alert">
-            Este aplicativo utiliza o modelo <strong>openai/whisper-large-v3-turbo</strong>
-            para transcrição e o <strong>facebook/nllb-200-distilled-600M</strong> para tradução.
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="src_lang" class="form-label">Idioma de origem:</label>
+                <select name="src_lang" id="src_lang" class="form-select">
+                    {% for lang in langs %}
+                    <option value="{{ lang }}">{{ lang }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="tgt_lang" class="form-label">Traduzir para:</label>
+                <select name="tgt_lang" id="tgt_lang" class="form-select">
+                    {% for lang in langs %}
+                    <option value="{{ lang }}">{{ lang }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
+
+        <div class="mb-3">
+            <label for="user_name" class="form-label">Nome do usuário:</label>
+            <input type="text" name="user_name" id="user_name" class="form-control" value="{{ user_name }}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="session_name" class="form-label">Nome da sessão:</label>
+            <input type="text" name="session_name" id="session_name" class="form-control" value="{{ session_name }}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="subject" class="form-label">Assunto:</label>
+            <input type="text" name="subject" id="subject" class="form-control">
+        </div>
+
+        <div class="form-check mb-4">
+            <input type="checkbox" name="save" id="save" value="1" class="form-check-input">
+            <label for="save" class="form-check-label">Salvar no banco de dados</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Processar</button>
+    </form>
+    <div id="progress" class="mt-4">
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+        <div id="progress-label" class="mt-2"></div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+    <div id="results" class="mt-5 result-box">
+        {% if results %}
+            {% for r in results %}
+                <div class="mb-4">
+                    <h4>{{ r.filename }}</h4>
+                    <strong>Texto Extraído:</strong>
+                    <p>{{ r.original_text }}</p>
+                    <strong>Texto Traduzido:</strong>
+                    <p>{{ r.translated_text }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if records %}
+        <div class="mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Áudios processados</h2>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#records-collapse">Mostrar/Esconder</button>
+            </div>
+            <div class="collapse show" id="records-collapse">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Assunto</th>
+                            <th>Áudio</th>
+                            <th>Texto Extraído</th>
+                            <th>Texto Traduzido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in records %}
+                        <tr>
+                            <td>{{ rec.subject }}</td>
+                            <td><a href="{{ rec.audio_path }}" target="_blank">Arquivo</a></td>
+                            <td>{{ rec.original_text }}</td>
+                            <td>{{ rec.translated_text }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="alert alert-info mt-4" role="alert">
+        Este aplicativo utiliza o modelo <strong>openai/whisper-large-v3-turbo</strong>
+        para transcrição e o <strong>facebook/nllb-200-distilled-600M</strong> para tradução.
+    </div>
+{% endblock %}
