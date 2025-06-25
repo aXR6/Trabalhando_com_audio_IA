@@ -1,5 +1,6 @@
 body {
     background-color: #f8f9fa;
+    padding-top: 70px; /* espaço para o navbar fixo */
 }
 
 form {
