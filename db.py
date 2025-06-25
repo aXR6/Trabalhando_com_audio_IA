@@ -89,3 +89,30 @@ def list_sessions(user_name: str) -> list[dict]:
         return [
             {"session_name": r[0], "record_count": r[1]} for r in rows
         ]
+
+
+def list_records(user_name: str, session_name: str) -> list[dict]:
+    """Return all audio records for ``session_name`` of ``user_name``."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT ar.subject, ar.audio_path, ar.original_text, ar.translated_text, ar.created_at
+            FROM audio_records ar
+            JOIN sessions s ON ar.session_id = s.id
+            JOIN users u ON s.user_id = u.id
+            WHERE u.name = %s AND s.session_name = %s
+            ORDER BY ar.created_at DESC
+            """,
+            (user_name, session_name),
+        )
+        rows = cur.fetchall()
+        return [
+            {
+                "subject": r[0],
+                "audio_path": r[1],
+                "original_text": r[2],
+                "translated_text": r[3],
+                "created_at": r[4],
+            }
+            for r in rows
+        ]

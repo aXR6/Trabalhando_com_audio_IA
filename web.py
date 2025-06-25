@@ -4,7 +4,7 @@ import os
 from speech import transcribe_audio
 from translation import translate_text
 from languages import LANG_CODE
-from db import init_db, save_record, list_sessions
+from db import init_db, save_record, list_sessions, list_records
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -32,8 +32,15 @@ def index():
     session_name = request.args.get('session_name')
     if not user_name or not session_name:
         return redirect(url_for('sessions_view'))
-    return render_template('index.html', langs=LANG_OPTIONS, results=None,
-                           user_name=user_name, session_name=session_name)
+    records = list_records(user_name, session_name)
+    return render_template(
+        'index.html',
+        langs=LANG_OPTIONS,
+        results=None,
+        records=records,
+        user_name=user_name,
+        session_name=session_name,
+    )
 
 @app.route('/transcrever', methods=['POST'])
 def transcrever():
@@ -59,8 +66,15 @@ def transcrever():
 
         results.append({'filename': filename, 'original_text': original_text, 'translated_text': translated_text})
 
-    return render_template('index.html', langs=LANG_OPTIONS, results=results,
-                           user_name=user_name, session_name=session_name)
+    records = list_records(user_name, session_name)
+    return render_template(
+        'index.html',
+        langs=LANG_OPTIONS,
+        results=results,
+        records=records,
+        user_name=user_name,
+        session_name=session_name,
+    )
 
 @app.route('/api/transcribe', methods=['POST'])
 def api_transcribe():
