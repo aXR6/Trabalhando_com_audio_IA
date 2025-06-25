@@ -6,3 +6,15 @@ form {
     max-width: 600px;
     margin: 0 auto;
 }
+
+#progress {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.result-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
