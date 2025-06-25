@@ -57,7 +57,12 @@
 
             <button type="submit" class="btn btn-primary w-100">Processar</button>
         </form>
-        <div id="progress" class="mt-4"></div>
+        <div id="progress" class="mt-4">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+            <div id="progress-label" class="mt-2"></div>
+        </div>
         <div id="results" class="mt-5 result-box">
             {% if results %}
                 {% for r in results %}
@@ -74,9 +79,13 @@
 
         {% if records %}
         <div class="mt-5">
-            <h2 class="h4 mb-3">Áudios processados</h2>
-            <div class="table-responsive">
-                <table class="table table-striped">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Áudios processados</h2>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#records-collapse">Mostrar/Esconder</button>
+            </div>
+            <div class="collapse show" id="records-collapse">
+                <div class="table-responsive">
+                    <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Assunto</th>
